@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1D9E75">
+  <title>MediSnap — Scan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1D9E75;
+      --primary-dark: #168a65;
+      --primary-soft: rgba(29, 158, 117, 0.12);
+      --primary-glow: rgba(29, 158, 117, 0.35);
+      --bg: #f4faf7;
+      --surface: #ffffff;
+      --text: #0f241c;
+      --text-muted: #5c7268;
+      --radius: 20px;
+      --radius-lg: 28px;
+      --shadow: 0 8px 32px rgba(15, 36, 28, 0.08);
+      --nav-h: 72px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      line-height: 1.5;
+    }
+    .app {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 24px);
+    }
+    .top-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: calc(12px + var(--safe-top)) 20px 16px;
+      background: var(--surface);
+      box-shadow: 0 1px 0 rgba(29, 158, 117, 0.08);
+    }
+    .back {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: none;
+      background: var(--primary-soft);
+      color: var(--primary);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .back svg { width: 20px; height: 20px; }
+    .top-bar h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    main { padding: 20px; }
+    .preview-box {
+      aspect-ratio: 4/3;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(145deg, #e8f5ef 0%, #d4ebe2 100%);
+      border: 2px dashed rgba(29, 158, 117, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+    .preview-box img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .preview-box.has-img .placeholder { display: none; }
+    .placeholder svg { width: 56px; height: 56px; color: var(--primary); opacity: 0.6; }
+    .placeholder p { color: var(--text-muted); font-weight: 600; font-size: 0.95rem; text-align: center; padding: 0 20px; }
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .file-btn, .cam-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 20px 12px;
+      border-radius: var(--radius);
+      border: none;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .file-btn:active, .cam-btn:active { transform: scale(0.98); }
+    .file-btn {
+      background: var(--surface);
+      color: var(--primary);
+      box-shadow: var(--shadow);
+    }
+    .cam-btn {
+      background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      box-shadow: 0 8px 24px var(--primary-glow);
+    }
+    .file-btn svg, .cam-btn svg { width: 28px; height: 28px; }
+    input[type="file"] { display: none; }
+    .hint {
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+    .primary-action {
+      margin-top: 24px;
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--primary);
+      color: #fff;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      opacity: 0.5;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .primary-action.ready {
+      opacity: 1;
+      pointer-events: auto;
+      box-shadow: 0 8px 28px var(--primary-glow);
+    }
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 36, 28, 0.75);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .overlay.show { display: flex; }
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      text-align: center;
+      max-width: 300px;
+      width: 100%;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--primary-soft);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .modal h3 { font-size: 1.1rem; margin-bottom: 8px; }
+    .modal p { font-size: 0.85rem; color: var(--text-muted); }
+    .modal-error h3 { color: #c43d2e; }
+    .modal-error .err-detail {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+      word-break: break-word;
+    }
+    .btn-dismiss {
+      margin-top: 18px;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--primary);
+      color: #fff;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(29, 158, 117, 0.12);
+      padding: 8px 12px calc(8px + var(--safe-bottom));
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+    .bottom-nav a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 12px;
+    }
+    .bottom-nav a svg { width: 22px; height: 22px; }
+    .bottom-nav a.active { color: var(--primary); background: var(--primary-soft); }
+  </style>
+  <script>
+    (function () {
+      try {
+        var raw = localStorage.getItem("medisnap_profile");
+        if (!raw) location.replace("onboarding.html");
+        else {
+          var p = JSON.parse(raw);
+          if (!p || !String(p.fullName || "").trim()) location.replace("onboarding.html");
+        }
+      } catch (e) { location.replace("onboarding.html"); }
+    })();
+  </script>
+</head>
+<body>
+  <div class="app">
+    <header class="top-bar">
+      <button type="button" class="back" onclick="location.href='index.html'" id="backBtn" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <h1 id="pageTitle"></h1>
+    </header>
+    <main>
+      <div class="preview-box" id="preview">
+        <div class="placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <p id="placeholderMain"></p>
+          <p id="placeholderSub" style="font-weight:500;font-size:0.85rem;margin-top:6px"></p>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" class="file-btn" id="pickGallery">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+          <span id="lblGallery"></span>
+        </button>
+        <button type="button" class="cam-btn" id="pickCamera">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span id="lblCamera"></span>
+        </button>
+      </div>
+      <input type="file" id="fileGallery" accept="image/*">
+      <input type="file" id="fileCamera" accept="image/*" capture="environment">
+      <p class="hint" id="hintText"></p>
+      <button type="button" class="primary-action" id="analyzeBtn"></button>
+    </main>
+    <div class="overlay" id="loadingOverlay" role="alert" aria-live="polite">
+      <div class="modal">
+        <div class="spinner"></div>
+        <h3 id="loadTitle"></h3>
+        <p id="loadSub"></p>
+      </div>
+    </div>
+    <div class="overlay" id="errorOverlay" role="alert" aria-live="assertive">
+      <div class="modal modal-error">
+        <h3 id="errTitle"></h3>
+        <p id="errBody"></p>
+        <p class="err-detail" id="errDetail"></p>
+        <button type="button" class="btn-dismiss" id="errDismiss"></button>
+      </div>
+    </div>
+    <nav class="bottom-nav" aria-label="Main">
+      <a href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span id="navHome"></span>
+      </a>
+      <a href="scan.html" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span id="navScan"></span>
+      </a>
+      <a href="reminder.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span id="navRemind"></span>
+      </a>
+      <a href="doctor.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span id="navDoctor"></span>
+      </a>
+    </nav>
+  </div>
+  <script>
+    (function () {
+      var GEMINI_API_KEY = "AIzaSyDaZAcGK8OCCxkbs5jMaZhGGvWZOz0xVGY";
+      var GEMINI_GENERATE_URL =
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
+        encodeURIComponent(GEMINI_API_KEY);
+
+      function lang() {
+        return localStorage.getItem("appLanguage") === "hi" ? "hi" : "en";
+      }
+
+      var T = {
+        en: {
+          back: "Back",
+          pageTitle: "Scan medicine",
+          placeholderMain: "Your photo will appear here",
+          placeholderSub: "Keep the strip, bottle, or label in focus.",
+          gallery: "Gallery",
+          camera: "Camera",
+          hint: "Upload a clear photo of medicine packaging. Analysis uses artificial intelligence and is for general education only — it is not a diagnosis.",
+          analyze: "Analyze and view result",
+          loadTitle: "Analyzing image…",
+          loadSub: "Please wait. This may take a few seconds.",
+          errTitle: "Could not analyze",
+          errBody: "The service is unavailable or the response was invalid. Check your connection and API key, then try again.",
+          errDismiss: "OK",
+          navHome: "Home",
+          navScan: "Scan",
+          navRemind: "Remind",
+          navDoctor: "Doctor"
+        },
+        hi: {
+          back: "पीछे",
+          pageTitle: "दवा स्कैन",
+          placeholderMain: "आपकी फ़ोटो यहाँ दिखेगी",
+          placeholderSub: "स्ट्रिप, बोतल या लेबल साफ़ और फोकस में रखें।",
+          gallery: "गैलरी",
+          camera: "कैमरा",
+          hint: "दवा की पैकिंग की साफ़ फ़ोटो अपलोड करें। विश्लेषण कृत्रिम बुद्धिमत्ता से है और केवल सामान्य जानकारी के लिए है — यह निदान नहीं है।",
+          analyze: "विश्लेषण करें और परिणाम देखें",
+          loadTitle: "छवि का विश्लेषण हो रहा है…",
+          loadSub: "कृपया प्रतीक्षा करें। कुछ क्षण लग सकते हैं।",
+          errTitle: "विश्लेषण नहीं हो सका",
+          errBody: "सेवा उपलब्ध नहीं है या प्रतिक्रिया अमान्य थी। कनेक्शन और एपीआई कुंजी जाँचें और पुनः प्रयास करें।",
+          errDismiss: "ठीक है",
+          navHome: "होम",
+          navScan: "स्कैन",
+          navRemind: "रिमाइंड",
+          navDoctor: "डॉक्टर"
+        }
+      };
+
+      function applyUi() {
+        var L = lang();
+        var s = T[L];
+        document.documentElement.lang = L === "hi" ? "hi" : "en";
+        document.getElementById("backBtn").setAttribute("aria-label", s.back);
+        document.getElementById("pageTitle").textContent = s.pageTitle;
+        document.getElementById("placeholderMain").textContent = s.placeholderMain;
+        document.getElementById("placeholderSub").textContent = s.placeholderSub;
+        document.getElementById("lblGallery").textContent = s.gallery;
+        document.getElementById("lblCamera").textContent = s.camera;
+        document.getElementById("hintText").textContent = s.hint;
+        document.getElementById("analyzeBtn").textContent = s.analyze;
+        document.getElementById("loadTitle").textContent = s.loadTitle;
+        document.getElementById("loadSub").textContent = s.loadSub;
+        document.getElementById("errTitle").textContent = s.errTitle;
+        document.getElementById("errBody").textContent = s.errBody;
+        document.getElementById("errDismiss").textContent = s.errDismiss;
+        document.getElementById("navHome").textContent = s.navHome;
+        document.getElementById("navScan").textContent = s.navScan;
+        document.getElementById("navRemind").textContent = s.navRemind;
+        document.getElementById("navDoctor").textContent = s.navDoctor;
+      }
+      applyUi();
+
+      var preview = document.getElementById("preview");
+      var analyzeBtn = document.getElementById("analyzeBtn");
+      var loadingOverlay = document.getElementById("loadingOverlay");
+      var errorOverlay = document.getElementById("errorOverlay");
+      var fileGallery = document.getElementById("fileGallery");
+      var fileCamera = document.getElementById("fileCamera");
+      var lastFile = null;
+
+      function setReady(on) {
+        analyzeBtn.classList.toggle("ready", on);
+      }
+
+      function showImage(file) {
+        if (!file || !file.type.startsWith("image/")) return;
+        lastFile = file;
+        var url = URL.createObjectURL(file);
+        preview.querySelectorAll("img").forEach(function (n) { n.remove(); });
+        var img = document.createElement("img");
+        img.src = url;
+        img.alt = T[lang()].pageTitle;
+        preview.appendChild(img);
+        preview.classList.add("has-img");
+        setReady(true);
+      }
+
+      function fileToBase64(file) {
+        return new Promise(function (resolve, reject) {
+          var r = new FileReader();
+          r.onloadend = function () {
+            var dataUrl = r.result;
+            if (typeof dataUrl !== "string") {
+              reject(new Error("read"));
+              return;
+            }
+            var m = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
+            if (!m) {
+              reject(new Error("format"));
+              return;
+            }
+            resolve({ mimeType: m[1], base64: m[2] });
+          };
+          r.onerror = function () { reject(new Error("read")); };
+          r.readAsDataURL(file);
+        });
+      }
+
+      function buildPrompt() {
+        return (
+          "You analyze medicine packaging, blister packs, bottles, or pill images. General education only — not personalized medical advice or diagnosis. " +
+          "Return ONLY valid JSON. Every value must be a string (use \"\" if unknown). Use EXACTLY these keys: " +
+          "\"nameEn\", \"nameHi\", \"conditionEn\", \"conditionHi\", \"dosageEn\", \"dosageHi\", \"warningsEn\", \"warningsHi\", " +
+          "\"timeOfDayEn\", \"timeOfDayHi\", \"whenToTakeEn\", \"whenToTakeHi\", \"timesPerDayEn\", \"timesPerDayHi\", \"courseDurationEn\", \"courseDurationHi\". " +
+          "nameEn/nameHi: product name as on pack (Latin/brand in nameEn; Devanagari transliteration or Hindi name in nameHi when sensible). " +
+          "conditionEn/conditionHi: typical conditions or uses. dosageEn/dosageHi: dose and frequency as commonly labeled. warningsEn/warningsHi: safety, side effects, when to see a doctor. " +
+          "timeOfDayHi: which parts of day in Hindi using words सुबह, दोपहर, रात where applicable (example: \"सुबह और रात\"). timeOfDayEn: same in English (Morning, Afternoon, Night). " +
+          "whenToTakeEn/whenToTakeHi: relation to food (e.g. After meals / खाने के बाद, Before meals / खाने से पहले). " +
+          "timesPerDayEn/timesPerDayHi: how many times per day (e.g. Twice daily / दिन में दो बार). " +
+          "courseDurationEn/courseDurationHi: typical course length if on label (e.g. 5 days / 5 दिन). " +
+          "Always fill BOTH English and Hindi for each pair. If the image is unclear or not medicine, still return all keys with brief explanations in warnings fields."
+        );
+      }
+
+      function normalizeMedicineJson(parsed) {
+        function s(v) {
+          return v == null ? "" : String(v);
+        }
+        if (!parsed || typeof parsed !== "object") return null;
+
+        if (typeof parsed.name === "string" && parsed.name !== "" && parsed.nameEn == null && parsed.nameHi == null) {
+          var one = function (x) {
+            return s(x) || "—";
+          };
+          var n = one(parsed.name);
+          var dis = one(parsed.disease);
+          var dos = one(parsed.dosage);
+          var war = one(parsed.warnings);
+          return {
+            nameEn: n,
+            nameHi: n,
+            conditionEn: dis,
+            conditionHi: dis,
+            dosageEn: dos,
+            dosageHi: dos,
+            warningsEn: war,
+            warningsHi: war,
+            timeOfDayEn: "",
+            timeOfDayHi: "",
+            whenToTakeEn: "",
+            whenToTakeHi: "",
+            timesPerDayEn: "",
+            timesPerDayHi: "",
+            courseDurationEn: "",
+            courseDurationHi: ""
+          };
+        }
+
+        var nameEn = s(parsed.nameEn);
+        var nameHi = s(parsed.nameHi);
+        if (!nameEn && !nameHi && typeof parsed.name === "string" && parsed.name !== "") {
+          nameEn = nameHi = parsed.name;
+        }
+        if (!nameEn && !nameHi) return null;
+
+        return {
+          nameEn: nameEn || "—",
+          nameHi: nameHi || "—",
+          conditionEn: s(parsed.conditionEn) || s(parsed.diseaseEn),
+          conditionHi: s(parsed.conditionHi) || s(parsed.diseaseHi),
+          dosageEn: s(parsed.dosageEn) || s(parsed.dosage),
+          dosageHi: s(parsed.dosageHi) || s(parsed.dosage),
+          warningsEn: s(parsed.warningsEn) || s(parsed.warnings),
+          warningsHi: s(parsed.warningsHi) || s(parsed.warnings),
+          timeOfDayEn: s(parsed.timeOfDayEn),
+          timeOfDayHi: s(parsed.timeOfDayHi),
+          whenToTakeEn: s(parsed.whenToTakeEn),
+          whenToTakeHi: s(parsed.whenToTakeHi),
+          timesPerDayEn: s(parsed.timesPerDayEn),
+          timesPerDayHi: s(parsed.timesPerDayHi),
+          courseDurationEn: s(parsed.courseDurationEn),
+          courseDurationHi: s(parsed.courseDurationHi)
+        };
+      }
+
+      function parseJsonText(text) {
+        var t = String(text).trim();
+        if (t.indexOf("```") !== -1) {
+          t = t.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+        }
+        return JSON.parse(t);
+      }
+
+      function showError(detail) {
+        var s = T[lang()];
+        document.getElementById("errTitle").textContent = s.errTitle;
+        document.getElementById("errBody").textContent = s.errBody;
+        document.getElementById("errDetail").textContent = detail || "";
+        errorOverlay.classList.add("show");
+      }
+
+      document.getElementById("errDismiss").addEventListener("click", function () {
+        errorOverlay.classList.remove("show");
+      });
+
+      document.getElementById("pickGallery").addEventListener("click", function () { fileGallery.click(); });
+      document.getElementById("pickCamera").addEventListener("click", function () { fileCamera.click(); });
+      fileGallery.addEventListener("change", function () {
+        if (fileGallery.files[0]) showImage(fileGallery.files[0]);
+      });
+      fileCamera.addEventListener("change", function () {
+        if (fileCamera.files[0]) showImage(fileCamera.files[0]);
+      });
+
+      analyzeBtn.addEventListener("click", function () {
+        if (!analyzeBtn.classList.contains("ready") || !lastFile) return;
+        var L = lang();
+        loadingOverlay.classList.add("show");
+        fileToBase64(lastFile)
+          .then(function (imgPart) {
+            return fetch(GEMINI_GENERATE_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [
+                  {
+                    parts: [
+                      { inline_data: { mime_type: imgPart.mimeType || "image/jpeg", data: imgPart.base64 } },
+                      { text: buildPrompt() }
+                    ]
+                  }
+                ],
+                generationConfig: {
+                  temperature: 0.25,
+                  responseMimeType: "application/json"
+                }
+              })
+            }).then(function (res) {
+              return res.json().then(function (body) {
+                return { ok: res.ok, body: body };
+              });
+            });
+          })
+          .then(function (out) {
+            if (!out.ok) {
+              var msg = (out.body && out.body.error && out.body.error.message) || "HTTP " + (out.body && out.body.error ? "error" : "");
+              throw new Error(msg);
+            }
+            var body = out.body;
+            var cand = body.candidates && body.candidates[0];
+            if (!cand || !cand.content || !cand.content.parts || !cand.content.parts[0]) {
+              throw new Error(cand && cand.finishReason ? "finishReason: " + cand.finishReason : "No response");
+            }
+            var text = cand.content.parts[0].text;
+            if (!text) throw new Error("Empty response");
+            var parsed = parseJsonText(text);
+            var payload = normalizeMedicineJson(parsed);
+            if (!payload || (!String(payload.nameEn || "").trim() && !String(payload.nameHi || "").trim())) {
+              throw new Error("Invalid JSON shape");
+            }
+            payload.lang = L;
+            sessionStorage.setItem("medisnap_result", JSON.stringify(payload));
+            window.location.href = "result.html";
+          })
+          .catch(function (e) {
+            loadingOverlay.classList.remove("show");
+            showError(e && e.message ? e.message : String(e));
+          });
+      });
+    })();
+  </script>
+</body>
+</html>

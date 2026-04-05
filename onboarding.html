@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1D9E75">
+  <title>MediSnap — Welcome</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1D9E75;
+      --primary-dark: #168a65;
+      --primary-soft: rgba(29, 158, 117, 0.14);
+      --primary-glow: rgba(29, 158, 117, 0.38);
+      --bg: #f0faf5;
+      --surface: #ffffff;
+      --text: #0f241c;
+      --text-muted: #5c7268;
+      --radius: 18px;
+      --radius-lg: 26px;
+      --shadow: 0 12px 40px rgba(15, 36, 28, 0.09);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      line-height: 1.5;
+    }
+    .wrap {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      padding: calc(20px + var(--safe-top)) 22px calc(28px + var(--safe-bottom));
+    }
+    .hero { text-align: center; margin-bottom: 24px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 8px 14px;
+      border-radius: 100px;
+      margin-bottom: 14px;
+    }
+    .hero h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 8px;
+      max-width: 320px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    form {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 24px 22px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(29, 158, 117, 0.1);
+    }
+    .field-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      margin-top: 18px;
+    }
+    .field-label:first-of-type { margin-top: 0; }
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"] {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      border: 2px solid rgba(29, 158, 117, 0.15);
+      font-family: inherit;
+      font-size: 1rem;
+      background: #fafcfb;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-soft);
+    }
+    .pill-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .pill-row label.opt {
+      flex: 1;
+      min-width: 100px;
+      margin: 0;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .pill-row label.opt input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .pill {
+      display: block;
+      padding: 14px 12px;
+      text-align: center;
+      border-radius: var(--radius);
+      border: 2px solid rgba(29, 158, 117, 0.18);
+      background: #fafcfb;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pill-row label.opt input:focus-visible + .pill {
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    .pill-row label.opt input:checked + .pill {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      color: var(--primary-dark);
+    }
+    .error {
+      color: #c43d2e;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-top: 14px;
+      display: none;
+    }
+    .error.show { display: block; }
+    .submit {
+      width: 100%;
+      margin-top: 28px;
+      padding: 16px;
+      border: none;
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      font-family: inherit;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 32px var(--primary-glow);
+    }
+    .submit:active { transform: scale(0.99); }
+  </style>
+  <script>
+    (function () {
+      try {
+        var raw = localStorage.getItem("medisnap_profile");
+        if (raw) {
+          var p = JSON.parse(raw);
+          if (p && p.fullName && String(p.fullName).trim()) {
+            window.location.replace("index.html");
+          }
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div class="badge" id="badgeText"></div>
+      <h1>MediSnap</h1>
+      <p id="heroSub"></p>
+    </div>
+    <form id="form" novalidate>
+      <span class="field-label" id="langLabel"></span>
+      <div class="pill-row" role="group" id="langGroup">
+        <label class="opt"><input type="radio" name="appLanguage" value="en" checked><span class="pill">English</span></label>
+        <label class="opt"><input type="radio" name="appLanguage" value="hi"><span class="pill">हिंदी (Hindi)</span></label>
+      </div>
+
+      <label class="field-label" for="fullName" id="lblFullName"></label>
+      <input type="text" id="fullName" name="fullName" autocomplete="name" required>
+
+      <label class="field-label" for="email" id="lblEmail"></label>
+      <input type="email" id="email" name="email" autocomplete="email" required>
+
+      <label class="field-label" for="phone" id="lblPhone"></label>
+      <input type="tel" id="phone" name="phone" autocomplete="tel" required>
+
+      <label class="field-label" for="age" id="lblAge"></label>
+      <input type="number" id="age" name="age" inputmode="numeric" min="1" max="120" required>
+
+      <span class="field-label" id="lblGender"></span>
+      <div class="pill-row" role="group" id="genderGroup">
+        <label class="opt"><input type="radio" name="gender" value="male" required><span class="pill" data-g="male"></span></label>
+        <label class="opt"><input type="radio" name="gender" value="female"><span class="pill" data-g="female"></span></label>
+        <label class="opt"><input type="radio" name="gender" value="other"><span class="pill" data-g="other"></span></label>
+      </div>
+
+      <p class="error" id="err" role="alert"></p>
+      <button type="submit" class="submit" id="btnContinue"></button>
+    </form>
+  </div>
+  <script>
+    (function () {
+      var T = {
+        en: {
+          badge: "Get started",
+          heroSub: "Create your profile for a better experience.",
+          langLabel: "App language",
+          fullName: "Full name",
+          phFullName: "Your full name",
+          email: "Email",
+          phEmail: "email@example.com",
+          phone: "Phone number",
+          phPhone: "+1 555 000 0000",
+          age: "Age",
+          phAge: "Age in years",
+          gender: "Gender",
+          gMale: "Male",
+          gFemale: "Female",
+          gOther: "Other",
+          continue: "Continue",
+          errName: "Please enter your name.",
+          errEmail: "Please enter a valid email.",
+          errPhone: "Please enter a valid phone number (at least 10 digits).",
+          errAge: "Please enter a valid age (1–120).",
+          errGender: "Please select gender."
+        },
+        hi: {
+          badge: "शुरुआत",
+          heroSub: "बेहतर अनुभव के लिए अपनी प्रोफ़ाइल बनाएँ।",
+          langLabel: "ऐप की भाषा",
+          fullName: "पूरा नाम",
+          phFullName: "अपना पूरा नाम",
+          email: "ईमेल",
+          phEmail: "email@example.com",
+          phone: "फ़ोन नंबर",
+          phPhone: "+91 9876543210",
+          age: "उम्र",
+          phAge: "उम्र (वर्ष)",
+          gender: "लिंग",
+          gMale: "पुरुष",
+          gFemale: "महिला",
+          gOther: "अन्य",
+          continue: "आगे बढ़ें",
+          errName: "कृपया अपना नाम लिखें।",
+          errEmail: "कृपया सही ईमेल दर्ज करें।",
+          errPhone: "कृपया सही फ़ोन नंबर दर्ज करें (कम से कम 10 अंक)।",
+          errAge: "कृपया सही उम्र (1–120) दर्ज करें।",
+          errGender: "कृपया लिंग चुनें।"
+        }
+      };
+
+      function currentLang() {
+        var r = document.querySelector('input[name="appLanguage"]:checked');
+        return r && r.value === "hi" ? "hi" : "en";
+      }
+
+      function applyTexts() {
+        var L = T[currentLang()];
+        document.documentElement.lang = currentLang() === "hi" ? "hi" : "en";
+        document.getElementById("badgeText").textContent = L.badge;
+        document.getElementById("heroSub").textContent = L.heroSub;
+        document.getElementById("langLabel").textContent = L.langLabel;
+        document.getElementById("lblFullName").textContent = L.fullName;
+        document.getElementById("fullName").placeholder = L.phFullName;
+        document.getElementById("lblEmail").textContent = L.email;
+        document.getElementById("email").placeholder = L.phEmail;
+        document.getElementById("lblPhone").textContent = L.phone;
+        document.getElementById("phone").placeholder = L.phPhone;
+        document.getElementById("lblAge").textContent = L.age;
+        document.getElementById("age").placeholder = L.phAge;
+        document.getElementById("lblGender").textContent = L.gender;
+        document.querySelector('[data-g="male"]').textContent = L.gMale;
+        document.querySelector('[data-g="female"]').textContent = L.gFemale;
+        document.querySelector('[data-g="other"]').textContent = L.gOther;
+        document.getElementById("btnContinue").textContent = L.continue;
+      }
+
+      var saved = localStorage.getItem("appLanguage");
+      if (saved === "hi") {
+        var hi = document.querySelector('input[name="appLanguage"][value="hi"]');
+        if (hi) hi.checked = true;
+      }
+      applyTexts();
+      document.querySelectorAll('input[name="appLanguage"]').forEach(function (el) {
+        el.addEventListener("change", applyTexts);
+      });
+
+      var form = document.getElementById("form");
+      var err = document.getElementById("err");
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        err.classList.remove("show");
+        var L = T[currentLang()];
+        var fullName = document.getElementById("fullName").value.trim();
+        var email = document.getElementById("email").value.trim();
+        var phone = document.getElementById("phone").value.trim();
+        var age = document.getElementById("age").value.trim();
+        var g = form.querySelector('input[name="gender"]:checked');
+        if (!fullName) { err.textContent = L.errName; err.classList.add("show"); return; }
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = L.errEmail; err.classList.add("show"); return; }
+        if (!phone || phone.replace(/\D/g, "").length < 10) { err.textContent = L.errPhone; err.classList.add("show"); return; }
+        var ageN = parseInt(age, 10);
+        if (!age || ageN < 1 || ageN > 120) { err.textContent = L.errAge; err.classList.add("show"); return; }
+        if (!g) { err.textContent = L.errGender; err.classList.add("show"); return; }
+        localStorage.setItem("appLanguage", currentLang());
+        var profile = {
+          fullName: fullName,
+          email: email,
+          phone: phone,
+          age: ageN,
+          gender: g.value
+        };
+        localStorage.setItem("medisnap_profile", JSON.stringify(profile));
+        window.location.href = "index.html";
+      });
+    })();
+  </script>
+</body>
+</html>

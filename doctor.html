@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1D9E75">
+  <title>MediSnap — Doctor suggestion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1D9E75;
+      --primary-dark: #168a65;
+      --primary-soft: rgba(29, 158, 117, 0.12);
+      --primary-glow: rgba(29, 158, 117, 0.35);
+      --bg: #f0faf5;
+      --surface: #ffffff;
+      --text: #0f241c;
+      --text-muted: #5c7268;
+      --radius: 18px;
+      --radius-lg: 26px;
+      --nav-h: 72px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      line-height: 1.5;
+    }
+    .app {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 20px);
+    }
+    .top {
+      padding: calc(14px + var(--safe-top)) 20px 12px;
+      background: linear-gradient(165deg, var(--primary) 0%, #22b384 100%);
+      color: #fff;
+      border-radius: 0 0 28px 28px;
+      box-shadow: 0 12px 40px var(--primary-glow);
+    }
+    .top h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; }
+    .top p { font-size: 0.88rem; opacity: 0.95; margin-top: 6px; max-width: 320px; line-height: 1.45; }
+    main { padding: 20px; }
+    .section-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+    .symptoms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .symptom {
+      position: relative;
+    }
+    .symptom input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .symptom span {
+      display: block;
+      padding: 11px 16px;
+      border-radius: 100px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border: 2px solid rgba(29, 158, 117, 0.2);
+      background: var(--surface);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .symptom input:checked + span {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+      color: var(--primary-dark);
+    }
+    .symptom input:focus-visible + span {
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    .cta {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 28px var(--primary-glow);
+      margin-bottom: 16px;
+    }
+    .cta:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .cta.loading { pointer-events: none; opacity: 0.85; }
+    .hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    .results { margin-top: 8px; }
+    .card-primary {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      margin-bottom: 14px;
+      border: 2px solid var(--primary);
+      box-shadow: 0 8px 32px rgba(29, 158, 117, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+    .card-primary::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, var(--primary-soft), transparent 70%);
+      pointer-events: none;
+    }
+    .pill-ai {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      background: var(--primary);
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 100px;
+      margin-bottom: 12px;
+    }
+    .card-primary .specialty {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      position: relative;
+      color: var(--primary-dark);
+    }
+    .card-primary .desc {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      position: relative;
+    }
+    .alt-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 20px 0 10px;
+    }
+    .card-alt {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      margin-bottom: 10px;
+      border-left: 4px solid var(--primary);
+      box-shadow: 0 4px 20px rgba(15, 36, 28, 0.06);
+    }
+    .card-alt .specialty { font-weight: 700; font-size: 0.98rem; margin-bottom: 8px; color: var(--primary); }
+    .card-alt .desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+    .empty-results { display: none; }
+    .empty-results.show { display: block; text-align: center; color: var(--text-muted); padding: 24px; font-size: 0.9rem; }
+    .banner-fallback {
+      display: none;
+      font-size: 0.78rem;
+      background: #fff8e6;
+      color: #7a5c00;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+      line-height: 1.45;
+    }
+    .banner-fallback.show { display: block; }
+    .disclaimer {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 8px 8px 0;
+      line-height: 1.45;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      background: rgba(255,255,255,0.94);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(29, 158, 117, 0.12);
+      padding: 8px 12px calc(8px + var(--safe-bottom));
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+    .bottom-nav a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 12px;
+    }
+    .bottom-nav a svg { width: 22px; height: 22px; }
+    .bottom-nav a.active { color: var(--primary); background: var(--primary-soft); }
+  </style>
+  <script>
+    (function () {
+      try {
+        var raw = localStorage.getItem("medisnap_profile");
+        if (!raw) location.replace("onboarding.html");
+        else {
+          var p = JSON.parse(raw);
+          if (!p || !String(p.fullName || "").trim()) location.replace("onboarding.html");
+        }
+      } catch (e) { location.replace("onboarding.html"); }
+    })();
+  </script>
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <h1 id="pageTitle"></h1>
+      <p id="pageSub"></p>
+    </header>
+    <main>
+      <p class="section-title" id="symptomSectionTitle"></p>
+      <div class="symptoms" id="symptoms"></div>
+      <p class="hint" id="hintText"></p>
+      <button type="button" class="cta" id="suggestBtn"></button>
+      <div class="banner-fallback" id="fallbackBanner"></div>
+      <div class="results" id="results" style="display:none">
+        <div class="card-primary" id="cardPrimary"></div>
+        <p class="alt-label" id="altLabel" style="display:none"></p>
+        <div id="cardAlts"></div>
+      </div>
+      <div class="empty-results" id="emptyHint"></div>
+      <p class="disclaimer" id="disclaimerText"></p>
+    </main>
+    <nav class="bottom-nav" aria-label="Main">
+      <a href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span id="navHome"></span>
+      </a>
+      <a href="scan.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span id="navScan"></span>
+      </a>
+      <a href="reminder.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span id="navRemind"></span>
+      </a>
+      <a href="doctor.html" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span id="navDoctor"></span>
+      </a>
+    </nav>
+  </div>
+  <script>
+    (function () {
+      var GEMINI_API_KEY = "AIzaSyDaZAcGK8OCCxkbs5jMaZhGGvWZOz0xVGY";
+      var MODEL = "gemini-2.5-flash";
+
+      function lang() {
+        return localStorage.getItem("appLanguage") === "hi" ? "hi" : "en";
+      }
+
+      var UI = {
+        en: {
+          pageTitle: "Doctor suggestion",
+          pageSub: "Select your symptoms. Artificial intelligence suggests which type of doctor to consult. This is not a diagnosis.",
+          symptomTitle: "Symptoms",
+          hint: "You may select more than one, then tap the button below.",
+          suggest: "Get suggestion",
+          thinking: "Thinking…",
+          altLabel: "Other options",
+          emptyPick: "Please select at least one symptom.",
+          pillAi: "Gemini AI",
+          pillOff: "Offline guide",
+          fbPrefix: "Could not reach the AI service. Showing offline guidance.",
+          disclaimer: "In an emergency, call your local emergency number or go to the nearest hospital. Suggestions are general guidance only — always see a qualified clinician.",
+          navHome: "Home",
+          navScan: "Scan",
+          navRemind: "Remind",
+          navDoctor: "Doctor"
+        },
+        hi: {
+          pageTitle: "डॉक्टर सुझाव",
+          pageSub: "अपने लक्षण चुनें। कृत्रिम बुद्धिमत्ता बताएगी किस प्रकार के डॉक्टर से परामर्श लें। यह निदान नहीं है।",
+          symptomTitle: "लक्षण",
+          hint: "एक से अधिक चुन सकते हैं, फिर नीचे बटन दबाएँ।",
+          suggest: "सुझाव प्राप्त करें",
+          thinking: "विचार हो रहा है…",
+          altLabel: "अन्य विकल्प",
+          emptyPick: "कृपया कम से कम एक लक्षण चुनें।",
+          pillAi: "जेमिनी एआई",
+          pillOff: "ऑफ़लाइन मार्गदर्शन",
+          fbPrefix: "एआई सेवा से जुड़ नहीं सका। ऑफ़लाइन मार्गदर्शन दिखाया जा रहा है।",
+          disclaimer: "आपातकाल में तुरंत आपातकालीन नंबर पर कॉल करें या नज़दीकी अस्पताल जाएँ। सुझाव केवल सामान्य मार्गदर्शन हैं — योग्य चिकित्सक से अवश्य मिलें।",
+          navHome: "होम",
+          navScan: "स्कैन",
+          navRemind: "रिमाइंड",
+          navDoctor: "डॉक्टर"
+        }
+      };
+
+      var SYMPTOMS = [
+        { id: "fever", en: "Fever", hi: "बुखार" },
+        { id: "cough", en: "Cough", hi: "खाँसी" },
+        { id: "chest_pain", en: "Chest pain", hi: "छाती में दर्द" },
+        { id: "breath", en: "Shortness of breath", hi: "साँस फूलना" },
+        { id: "headache", en: "Headache", hi: "सिरदर्द" },
+        { id: "stomach", en: "Stomach pain", hi: "पेट दर्द" },
+        { id: "skin", en: "Skin rash", hi: "त्वचा पर चकत्ते" },
+        { id: "joint", en: "Joint pain", hi: "जोड़ों का दर्द" },
+        { id: "ear", en: "Ear pain", hi: "कान में दर्द" },
+        { id: "throat", en: "Sore throat", hi: "गले में दर्द" },
+        { id: "eye", en: "Eye problem", hi: "आँख की समस्या" },
+        { id: "urinary", en: "Urinary symptoms", hi: "मूत्र संबंधी लक्षण" },
+        { id: "anxiety", en: "Stress or anxiety", hi: "तनाव या चिंता" },
+        { id: "dizziness", en: "Dizziness", hi: "चक्कर आना" }
+      ];
+
+      function applyChrome() {
+        var L = lang();
+        var u = UI[L];
+        document.documentElement.lang = L === "hi" ? "hi" : "en";
+        document.getElementById("pageTitle").textContent = u.pageTitle;
+        document.getElementById("pageSub").textContent = u.pageSub;
+        document.getElementById("symptomSectionTitle").textContent = u.symptomTitle;
+        document.getElementById("hintText").textContent = u.hint;
+        document.getElementById("suggestBtn").textContent = u.suggest;
+        document.getElementById("altLabel").textContent = u.altLabel;
+        document.getElementById("disclaimerText").textContent = u.disclaimer;
+        document.getElementById("navHome").textContent = u.navHome;
+        document.getElementById("navScan").textContent = u.navScan;
+        document.getElementById("navRemind").textContent = u.navRemind;
+        document.getElementById("navDoctor").textContent = u.navDoctor;
+        var box = document.getElementById("symptoms");
+        box.innerHTML = "";
+        SYMPTOMS.forEach(function (s) {
+          var lab = document.createElement("label");
+          lab.className = "symptom";
+          var label = L === "hi" ? s.hi : s.en;
+          lab.innerHTML = '<input type="checkbox" value="' + s.id + '"><span>' + label + "</span>";
+          box.appendChild(lab);
+        });
+      }
+      applyChrome();
+
+      var box = document.getElementById("symptoms");
+
+      function selectedIds() {
+        return Array.prototype.slice.call(box.querySelectorAll("input:checked")).map(function (i) { return i.value; });
+      }
+
+      function fallbackSuggestion(ids, L) {
+        var set = {};
+        ids.forEach(function (x) { set[x] = true; });
+        var en = {
+          primary: {
+            specialty: "General physician",
+            description: "Your symptoms could match several conditions. Start with a general physician, who can refer you to a specialist if needed."
+          },
+          alternatives: []
+        };
+        var hi = {
+          primary: {
+            specialty: "सामान्य चिकित्सक",
+            description: "आपके लक्षण कई स्थितियों से मेल खा सकते हैं। पहले सामान्य चिकित्सक से मिलें; ज़रूरत पड़ने पर वे विशेषज्ञ भेज सकते हैं।"
+          },
+          alternatives: []
+        };
+        if (set.chest_pain || set.breath) {
+          en.primary = {
+            specialty: "Cardiologist or emergency care",
+            description: "Chest pain or breathing difficulty can be serious. Seek urgent medical care; a cardiologist may be appropriate for follow-up."
+          };
+          hi.primary = {
+            specialty: "हृदय रोग विशेषज्ञ या आपातकालीन देखभाल",
+            description: "छाती में दर्द या साँस की तकलीफ गंभीर हो सकती है। तुरंत चिकित्सा सहायता लें; फॉलो-अप के लिए कार्डियोलॉजिस्ट उपयुक्त हो सकते हैं।"
+          };
+        } else if (set.skin) {
+          en.primary = { specialty: "Dermatologist", description: "Rashes and skin problems are usually assessed by a dermatologist." };
+          hi.primary = { specialty: "त्वचा विशेषज्ञ", description: "चकत्ते और त्वचा की समस्याओं का मूल्यांकन आमतौर पर त्वचा विशेषज्ञ करते हैं।" };
+        } else if (set.joint) {
+          en.primary = { specialty: "Orthopedist or rheumatologist", description: "Joint pain may be evaluated by an orthopedist or rheumatologist." };
+          hi.primary = { specialty: "हड्डी या जोड़ विशेषज्ञ", description: "जोड़ों के दर्द का मूल्यांकन ऑर्थोपेडिस्ट या रूमेटोलॉजिस्ट कर सकते हैं।" };
+        } else if (set.ear || set.throat) {
+          en.primary = { specialty: "Ear, nose, and throat specialist", description: "Ear, nose, and throat symptoms are typically seen by an ENT specialist." };
+          hi.primary = { specialty: "कान, नाक व गले का विशेषज्ञ", description: "कान, नाक और गले के लक्षण आमतौर पर ईएनटी विशेषज्ञ देखते हैं।" };
+        } else if (set.eye) {
+          en.primary = { specialty: "Ophthalmologist", description: "Eye problems should be checked by an eye specialist." };
+          hi.primary = { specialty: "नेत्र विशेषज्ञ", description: "आँख की समस्याओं की जाँच नेत्र विशेषज्ञ से कराएँ।" };
+        } else if (set.urinary) {
+          en.primary = { specialty: "Urologist or nephrologist", description: "Urinary symptoms may be assessed by a urologist or nephrologist." };
+          hi.primary = { specialty: "यूरोलॉजिस्ट या नेफ्रोलॉजिस्ट", description: "मूत्र संबंधी लक्षणों का मूल्यांकन यूरोलॉजिस्ट या नेफ्रोलॉजिस्ट कर सकते हैं।" };
+        } else if (set.anxiety) {
+          en.primary = { specialty: "Psychiatrist or psychologist", description: "Stress and anxiety are often discussed with a mental health professional." };
+          hi.primary = { specialty: "मनोचिकित्सक या मनोवैज्ञानिक", description: "तनाव और चिंता पर अक्सर मानसिक स्वास्थ्य पेशेवर से चर्चा होती है।" };
+        } else if (set.stomach) {
+          en.primary = { specialty: "Gastroenterologist", description: "Digestive symptoms are commonly reviewed by a gastroenterologist." };
+          hi.primary = { specialty: "गैस्ट्रोएंटेरोलॉजिस्ट", description: "पाचन संबंधी लक्षण आमतौर पर गैस्ट्रोएंटेरोलॉजिस्ट देखते हैं।" };
+        } else if (set.fever && set.cough) {
+          en.primary = { specialty: "General physician", description: "Fever with cough is often related to colds or infections. A general physician can start the evaluation." };
+          hi.primary = { specialty: "सामान्य चिकित्सक", description: "बुखार के साथ खाँसी अक्सर सर्दी या संक्रमण से जुड़ी होती है। मूल्यांकन सामान्य चिकित्सक से शुरू करें।" };
+        }
+        var out = L === "hi" ? hi : en;
+        var alts = [];
+        var specStr = out.primary.specialty;
+        var isGen = /general|सामान्य/i.test(specStr);
+        var isCardio = /cardio|हृदय|emergency|आपात/i.test(specStr);
+        if (!isGen) {
+          if (L === "en") {
+            alts.push({
+              specialty: "General physician",
+              description: "If you are unsure, a general physician is still a good first contact."
+            });
+          } else {
+            alts.push({
+              specialty: "सामान्य चिकित्सक",
+              description: "यदि आप अनिश्चित हैं तो सामान्य चिकित्सक से संपर्क करना अभी भी उचित है।"
+            });
+          }
+        }
+        if (set.fever && !set.chest_pain && !isCardio) {
+          if (L === "en" && alts.length < 2) {
+            alts.push({
+              specialty: "General physician",
+              description: "Fever evaluation often begins with a general physician."
+            });
+          } else if (L === "hi" && alts.length < 2) {
+            alts.push({
+              specialty: "सामान्य चिकित्सक",
+              description: "बुखार की जाँच अक्सर सामान्य चिकित्सक से शुरू होती है।"
+            });
+          }
+        }
+        out.alternatives = alts.slice(0, 2);
+        return out;
+      }
+
+      function render(data, usedAi) {
+        var L = lang();
+        var u = UI[L];
+        document.getElementById("emptyHint").classList.remove("show");
+        document.getElementById("results").style.display = "block";
+        var cp = document.getElementById("cardPrimary");
+        cp.innerHTML =
+          '<span class="pill-ai"></span><div class="specialty"></div><div class="desc"></div>';
+        cp.querySelector(".pill-ai").textContent = usedAi ? u.pillAi : u.pillOff;
+        cp.querySelector(".specialty").textContent = data.primary.specialty;
+        cp.querySelector(".desc").textContent = data.primary.description;
+        var alts = data.alternatives || [];
+        var altLabel = document.getElementById("altLabel");
+        var ca = document.getElementById("cardAlts");
+        ca.innerHTML = "";
+        if (alts.length) {
+          altLabel.style.display = "block";
+          alts.forEach(function (a) {
+            var d = document.createElement("div");
+            d.className = "card-alt";
+            d.innerHTML = '<div class="specialty"></div><div class="desc"></div>';
+            d.querySelector(".specialty").textContent = a.specialty;
+            d.querySelector(".desc").textContent = a.description || "";
+            ca.appendChild(d);
+          });
+        } else {
+          altLabel.style.display = "none";
+        }
+      }
+
+      function parseGeminiJson(text) {
+        var t = text.trim();
+        if (t.indexOf("```") !== -1) {
+          t = t.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+        }
+        return JSON.parse(t);
+      }
+
+      function normalizeFromApi(parsed, L) {
+        var p = parsed.primary || {};
+        var spec = p.specialty || p.typeEn || "";
+        var desc = p.description || p.descHi || p.descEn || "";
+        if (!spec && p.typeHi) spec = p.typeHi;
+        var alts = Array.isArray(parsed.alternatives) ? parsed.alternatives : [];
+        return {
+          primary: { specialty: String(spec), description: String(desc) },
+          alternatives: alts.slice(0, 2).map(function (a) {
+            return {
+              specialty: String(a.specialty || a.typeEn || a.typeHi || ""),
+              description: String(a.description || a.descHi || a.descEn || "")
+            };
+          })
+        };
+      }
+
+      document.getElementById("suggestBtn").addEventListener("click", async function () {
+        var L = lang();
+        var u = UI[L];
+        var ids = selectedIds();
+        var btn = document.getElementById("suggestBtn");
+        var fb = document.getElementById("fallbackBanner");
+        fb.classList.remove("show");
+        fb.textContent = "";
+
+        if (!ids.length) {
+          document.getElementById("emptyHint").classList.add("show");
+          document.getElementById("emptyHint").textContent = u.emptyPick;
+          document.getElementById("results").style.display = "none";
+          return;
+        }
+
+        document.getElementById("emptyHint").classList.remove("show");
+        btn.disabled = true;
+        btn.classList.add("loading");
+        var prev = btn.textContent;
+        btn.textContent = u.thinking;
+
+        var labels = SYMPTOMS.filter(function (s) { return ids.indexOf(s.id) !== -1; }).map(function (s) {
+          return L === "hi" ? s.hi : s.en;
+        });
+
+        var promptEn =
+          "The user selected these symptoms: " +
+          labels.join(", ") +
+          ". Return ONLY valid JSON (no markdown) with this exact shape: " +
+          '{"primary":{"specialty":"string","description":"string"},"alternatives":[{"specialty":"string","description":"string"}]} ' +
+          "Use 0 to 2 alternatives. Suggest appropriate medical specialties (for example general physician, cardiologist). " +
+          "All text must be written entirely in English. This is triage education, not a diagnosis. Use cautious wording.";
+
+        var promptHi =
+          "उपयोगकर्ता ने ये लक्षण चुने: " +
+          labels.join(", ") +
+          ". केवल मान्य JSON लौटाएँ (मार्कडाउन नहीं), आकार: " +
+          '{"primary":{"specialty":"string","description":"string"},"alternatives":[{"specialty":"string","description":"string"}]} ' +
+          "विकल्प 0 से 2 तक। उपयुक्त चिकित्सा विशेषता सुझाएँ। सारा पाठ पूरी तरह हिंदी में हो (देवनागरी)। यह निदान नहीं है। सावधानीपूर्ण भाषा।";
+
+        try {
+          var url =
+            "https://generativelanguage.googleapis.com/v1beta/models/" +
+            MODEL +
+            ":generateContent?key=" +
+            encodeURIComponent(GEMINI_API_KEY);
+          var res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: L === "hi" ? promptHi : promptEn }] }],
+              generationConfig: {
+                temperature: 0.35,
+                responseMimeType: "application/json"
+              }
+            })
+          });
+          var body = await res.json();
+          if (!res.ok) throw new Error(body.error && body.error.message ? body.error.message : "API error");
+          var part = body.candidates && body.candidates[0] && body.candidates[0].content && body.candidates[0].content.parts && body.candidates[0].content.parts[0];
+          if (!part || !part.text) throw new Error("No response");
+          var parsed = parseGeminiJson(part.text);
+          var norm = normalizeFromApi(parsed, L);
+          if (!norm.primary.specialty) throw new Error("Bad shape");
+          render(norm, true);
+        } catch (e) {
+          fb.textContent = u.fbPrefix + " (" + (e.message || "error") + ")";
+          fb.classList.add("show");
+          render(fallbackSuggestion(ids, L), false);
+        } finally {
+          btn.disabled = false;
+          btn.classList.remove("loading");
+          btn.textContent = prev;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

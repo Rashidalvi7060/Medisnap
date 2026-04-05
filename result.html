@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1D9E75">
+  <title>MediSnap — Result</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1D9E75;
+      --primary-dark: #168a65;
+      --primary-soft: rgba(29, 158, 117, 0.12);
+      --bg: #f4faf7;
+      --surface: #ffffff;
+      --text: #0f241c;
+      --text-muted: #5c7268;
+      --radius: 20px;
+      --radius-lg: 28px;
+      --shadow: 0 8px 32px rgba(15, 36, 28, 0.08);
+      --nav-h: 72px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      line-height: 1.55;
+    }
+    .app {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 24px);
+    }
+    .top-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: calc(12px + var(--safe-top)) 20px 16px;
+      background: linear-gradient(180deg, var(--primary) 0%, #22b384 100%);
+      color: #fff;
+    }
+    .back {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: none;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .back svg { width: 20px; height: 20px; }
+    .top-bar h1 { font-size: 1.05rem; font-weight: 800; line-height: 1.3; }
+    main { padding: 20px; }
+    .badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 6px 12px;
+      border-radius: 100px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      margin-bottom: 14px;
+    }
+    .name-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+      border: 1px solid rgba(29, 158, 117, 0.15);
+      background: linear-gradient(145deg, #ffffff 0%, #f8fcfa 100%);
+    }
+    .section-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .section {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 16px 16px 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 16px rgba(15, 36, 28, 0.06);
+      border: 1px solid rgba(29, 158, 117, 0.08);
+    }
+    .section h3 {
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--primary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section h3::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+      flex-shrink: 0;
+    }
+    .section.warn h3 { color: #c45c3a; }
+    .section.warn h3::before { background: #c45c3a; }
+    .section.timing h3 { color: #1565c0; }
+    .section.timing h3::before { background: #1565c0; }
+    .section.schedule {
+      border: 2px solid rgba(29, 158, 117, 0.2);
+      background: linear-gradient(180deg, #ffffff 0%, #f0faf6 100%);
+    }
+    .lang-pair {
+      margin-bottom: 12px;
+    }
+    .lang-pair:last-child { margin-bottom: 0; }
+    .lang-tag {
+      display: inline-block;
+      font-size: 0.62rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+    .lang-tag.hi { color: var(--text-muted); }
+    .lang-text {
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: var(--text);
+    }
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(29, 158, 117, 0.2), transparent);
+      margin: 12px 0;
+    }
+    .time-hi-highlight {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      line-height: 1.5;
+      padding: 12px 14px;
+      background: var(--primary-soft);
+      border-radius: 14px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .schedule-row {
+      margin-bottom: 14px;
+    }
+    .schedule-row:last-child { margin-bottom: 0; }
+    .schedule-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .actions-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px;
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      text-align: center;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-outline {
+      background: var(--surface);
+      color: var(--primary);
+      border: 2px solid var(--primary-soft);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state a {
+      color: var(--primary);
+      font-weight: 700;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(29, 158, 117, 0.12);
+      padding: 8px 12px calc(8px + var(--safe-bottom));
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+    .bottom-nav a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 12px;
+    }
+    .bottom-nav a svg { width: 22px; height: 22px; }
+    .bottom-nav a.active { color: var(--primary); background: var(--primary-soft); }
+  </style>
+  <script>
+    (function () {
+      try {
+        var raw = localStorage.getItem("medisnap_profile");
+        if (!raw) location.replace("onboarding.html");
+        else {
+          var p = JSON.parse(raw);
+          if (!p || !String(p.fullName || "").trim()) location.replace("onboarding.html");
+        }
+      } catch (e) { location.replace("onboarding.html"); }
+    })();
+  </script>
+</head>
+<body>
+  <div class="app">
+    <header class="top-bar">
+      <button type="button" class="back" onclick="location.href='scan.html'" id="backBtn" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <h1 id="pageTitle"></h1>
+    </header>
+    <main id="main">
+      <div class="empty-state" id="empty">
+        <p id="emptyText"></p>
+      </div>
+      <div id="content" style="display:none">
+        <span class="badge" id="badgeText"></span>
+
+        <div class="name-card">
+          <div class="section-title" id="lblNameBlock"></div>
+          <div class="lang-pair">
+            <span class="lang-tag">English</span>
+            <p class="lang-text" id="nameEn"></p>
+          </div>
+          <div class="divider"></div>
+          <div class="lang-pair">
+            <span class="lang-tag hi">हिंदी</span>
+            <p class="lang-text" id="nameHi"></p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3 id="hdrCondition"></h3>
+          <div class="lang-pair">
+            <span class="lang-tag">English</span>
+            <p class="lang-text" id="conditionEn"></p>
+          </div>
+          <div class="divider"></div>
+          <div class="lang-pair">
+            <span class="lang-tag hi">हिंदी</span>
+            <p class="lang-text" id="conditionHi"></p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3 id="hdrDosage"></h3>
+          <div class="lang-pair">
+            <span class="lang-tag">English</span>
+            <p class="lang-text" id="dosageEn"></p>
+          </div>
+          <div class="divider"></div>
+          <div class="lang-pair">
+            <span class="lang-tag hi">हिंदी</span>
+            <p class="lang-text" id="dosageHi"></p>
+          </div>
+        </div>
+
+        <div class="section warn">
+          <h3 id="hdrWarnings"></h3>
+          <div class="lang-pair">
+            <span class="lang-tag">English</span>
+            <p class="lang-text" id="warningsEn"></p>
+          </div>
+          <div class="divider"></div>
+          <div class="lang-pair">
+            <span class="lang-tag hi">हिंदी</span>
+            <p class="lang-text" id="warningsHi"></p>
+          </div>
+        </div>
+
+        <div class="section timing">
+          <h3 id="hdrTimeOfDay"></h3>
+          <p class="section-title" style="margin-top:-4px;font-size:0.7rem;opacity:0.85" id="subTimeOfDay"></p>
+          <div class="time-hi-highlight" id="timeOfDayHi"></div>
+          <div class="lang-pair">
+            <span class="lang-tag">English</span>
+            <p class="lang-text" id="timeOfDayEn"></p>
+          </div>
+        </div>
+
+        <div class="section schedule">
+          <h3 id="hdrSchedule"></h3>
+          <div class="schedule-row">
+            <div class="schedule-label" id="lblWhenToTake"></div>
+            <div class="lang-pair" style="margin-bottom:8px">
+              <span class="lang-tag">English</span>
+              <p class="lang-text" id="whenToTakeEn"></p>
+            </div>
+            <div class="lang-pair">
+              <span class="lang-tag hi">हिंदी</span>
+              <p class="lang-text" id="whenToTakeHi"></p>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="schedule-row">
+            <div class="schedule-label" id="lblTimesPerDay"></div>
+            <div class="lang-pair" style="margin-bottom:8px">
+              <span class="lang-tag">English</span>
+              <p class="lang-text" id="timesPerDayEn"></p>
+            </div>
+            <div class="lang-pair">
+              <span class="lang-tag hi">हिंदी</span>
+              <p class="lang-text" id="timesPerDayHi"></p>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="schedule-row">
+            <div class="schedule-label" id="lblCourse"></div>
+            <div class="lang-pair" style="margin-bottom:8px">
+              <span class="lang-tag">English</span>
+              <p class="lang-text" id="courseDurationEn"></p>
+            </div>
+            <div class="lang-pair">
+              <span class="lang-tag hi">हिंदी</span>
+              <p class="lang-text" id="courseDurationHi"></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions-row">
+          <a href="reminder.html" class="btn btn-outline" id="btnRemind"></a>
+          <a href="doctor.html" class="btn btn-primary" id="btnDoctor"></a>
+        </div>
+      </div>
+    </main>
+    <nav class="bottom-nav" aria-label="Main">
+      <a href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span id="navHome"></span>
+      </a>
+      <a href="scan.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span id="navScan"></span>
+      </a>
+      <a href="reminder.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span id="navRemind"></span>
+      </a>
+      <a href="doctor.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span id="navDoctor"></span>
+      </a>
+    </nav>
+  </div>
+  <script>
+    (function () {
+      function lang() {
+        return localStorage.getItem("appLanguage") === "hi" ? "hi" : "en";
+      }
+
+      function normalizeStored(d) {
+        function s(v) {
+          return v == null ? "" : String(v);
+        }
+        if (!d) return null;
+        if (d.nameEn != null || d.nameHi != null) {
+          return {
+            nameEn: s(d.nameEn),
+            nameHi: s(d.nameHi),
+            conditionEn: s(d.conditionEn) || s(d.diseaseEn),
+            conditionHi: s(d.conditionHi) || s(d.diseaseHi),
+            dosageEn: s(d.dosageEn) || s(d.dosage),
+            dosageHi: s(d.dosageHi) || s(d.dosage),
+            warningsEn: s(d.warningsEn) || s(d.warnings),
+            warningsHi: s(d.warningsHi) || s(d.warnings),
+            timeOfDayEn: s(d.timeOfDayEn),
+            timeOfDayHi: s(d.timeOfDayHi),
+            whenToTakeEn: s(d.whenToTakeEn),
+            whenToTakeHi: s(d.whenToTakeHi),
+            timesPerDayEn: s(d.timesPerDayEn),
+            timesPerDayHi: s(d.timesPerDayHi),
+            courseDurationEn: s(d.courseDurationEn),
+            courseDurationHi: s(d.courseDurationHi)
+          };
+        }
+        if (d.name && !d.nameEn) {
+          var n = s(d.name);
+          var dis = s(d.disease);
+          var dos = s(d.dosage);
+          var war = s(d.warnings);
+          return {
+            nameEn: n,
+            nameHi: n,
+            conditionEn: dis || "—",
+            conditionHi: dis || "—",
+            dosageEn: dos || "—",
+            dosageHi: dos || "—",
+            warningsEn: war || "—",
+            warningsHi: war || "—",
+            timeOfDayEn: "",
+            timeOfDayHi: "",
+            whenToTakeEn: "",
+            whenToTakeHi: "",
+            timesPerDayEn: "",
+            timesPerDayHi: "",
+            courseDurationEn: "",
+            courseDurationHi: ""
+          };
+        }
+        if (d.nameEn || d.nameHi || d.diseaseEn) {
+          return normalizeStored({
+            nameEn: d.nameEn,
+            nameHi: d.nameHi,
+            conditionEn: d.conditionEn != null ? d.conditionEn : d.diseaseEn,
+            conditionHi: d.conditionHi != null ? d.conditionHi : d.diseaseHi,
+            dosageEn: d.dosageEn != null ? d.dosageEn : d.dosage,
+            dosageHi: d.dosageHi != null ? d.dosageHi : d.dosage,
+            warningsEn: d.warningsEn != null ? d.warningsEn : d.warnings,
+            warningsHi: d.warningsHi != null ? d.warningsHi : d.warnings
+          });
+        }
+        return null;
+      }
+
+      function dash(x) {
+        x = (x || "").trim();
+        return x || "—";
+      }
+
+      var L = lang();
+      var T = {
+        en: {
+          back: "Back",
+          pageTitle: "Scan result",
+          badge: "AI analysis",
+          nameBlock: "Medicine name · दवा का नाम",
+          condition: "Condition & use · स्थिति व उपयोग",
+          dosage: "Dosage · खुराक",
+          warnings: "Warnings · चेतावनियाँ",
+          timeOfDay: "Time of day · दिन में समय",
+          timeSub: "सुबह · दोपहर · रात",
+          schedule: "Schedule · समय-सारणी",
+          whenToTake: "When to take · कब लें",
+          timesPerDay: "How many times a day · दिन में कितनी बार",
+          course: "Course duration · कोर्स की अवधि",
+          remind: "Set reminder",
+          doctor: "Doctor suggestion",
+          readErr: "Could not read data. Please scan again.",
+          notSpecified: "Not specified on label",
+          navHome: "Home",
+          navScan: "Scan",
+          navRemind: "Remind",
+          navDoctor: "Doctor"
+        },
+        hi: {
+          back: "पीछे",
+          pageTitle: "स्कैन परिणाम",
+          badge: "कृत्रिम बुद्धिमत्ता विश्लेषण",
+          nameBlock: "दवा का नाम · Medicine name",
+          condition: "स्थिति व उपयोग · Condition & use",
+          dosage: "खुराक · Dosage",
+          warnings: "चेतावनियाँ · Warnings",
+          timeOfDay: "दिन में समय · Time of day",
+          timeSub: "सुबह · दोपहर · रात",
+          schedule: "समय-सारणी · Schedule",
+          whenToTake: "कब लें · When to take",
+          timesPerDay: "दिन में कितनी बार · How many times a day",
+          course: "कोर्स की अवधि · Course duration",
+          remind: "रिमाइंडर सेट करें",
+          doctor: "डॉक्टर सुझाव",
+          readErr: "डेटा पढ़ा नहीं जा सका। कृपया पुनः स्कैन करें।",
+          notSpecified: "लेबल पर उल्लेख नहीं",
+          navHome: "होम",
+          navScan: "स्कैन",
+          navRemind: "रिमाइंड",
+          navDoctor: "डॉक्टर"
+        }
+      };
+      var s = T[L];
+      document.documentElement.lang = L === "hi" ? "hi" : "en";
+      document.getElementById("backBtn").setAttribute("aria-label", s.back);
+      document.getElementById("pageTitle").textContent = s.pageTitle;
+      document.getElementById("lblNameBlock").textContent = s.nameBlock;
+      document.getElementById("hdrCondition").textContent = s.condition;
+      document.getElementById("hdrDosage").textContent = s.dosage;
+      document.getElementById("hdrWarnings").textContent = s.warnings;
+      document.getElementById("hdrTimeOfDay").textContent = s.timeOfDay;
+      document.getElementById("subTimeOfDay").textContent = s.timeSub;
+      document.getElementById("hdrSchedule").textContent = s.schedule;
+      document.getElementById("lblWhenToTake").textContent = s.whenToTake;
+      document.getElementById("lblTimesPerDay").textContent = s.timesPerDay;
+      document.getElementById("lblCourse").textContent = s.course;
+      document.getElementById("btnRemind").textContent = s.remind;
+      document.getElementById("btnDoctor").textContent = s.doctor;
+      document.getElementById("navHome").textContent = s.navHome;
+      document.getElementById("navScan").textContent = s.navScan;
+      document.getElementById("navRemind").textContent = s.navRemind;
+      document.getElementById("navDoctor").textContent = s.navDoctor;
+
+      var raw = sessionStorage.getItem("medisnap_result");
+      var empty = document.getElementById("empty");
+      var content = document.getElementById("content");
+      var emptyP = document.getElementById("emptyText");
+
+      if (!raw) {
+        emptyP.textContent = "";
+        if (L === "en") {
+          emptyP.appendChild(document.createTextNode("No result found. "));
+          var a = document.createElement("a");
+          a.href = "scan.html";
+          a.textContent = "Scan a medicine";
+          emptyP.appendChild(a);
+          emptyP.appendChild(document.createTextNode(" to continue."));
+        } else {
+          emptyP.appendChild(document.createTextNode("कोई परिणाम नहीं। "));
+          var a2 = document.createElement("a");
+          a2.href = "scan.html";
+          a2.textContent = "दवा स्कैन करें";
+          emptyP.appendChild(a2);
+          emptyP.appendChild(document.createTextNode("।"));
+        }
+        return;
+      }
+
+      try {
+        var d = normalizeStored(JSON.parse(raw));
+        if (!d || (!d.nameEn && !d.nameHi)) {
+          emptyP.textContent = s.readErr;
+          return;
+        }
+
+        empty.style.display = "none";
+        content.style.display = "block";
+        document.getElementById("badgeText").textContent = s.badge;
+
+        document.getElementById("nameEn").textContent = dash(d.nameEn);
+        document.getElementById("nameHi").textContent = dash(d.nameHi);
+        document.getElementById("conditionEn").textContent = dash(d.conditionEn);
+        document.getElementById("conditionHi").textContent = dash(d.conditionHi);
+        document.getElementById("dosageEn").textContent = dash(d.dosageEn);
+        document.getElementById("dosageHi").textContent = dash(d.dosageHi);
+        document.getElementById("warningsEn").textContent = dash(d.warningsEn);
+        document.getElementById("warningsHi").textContent = dash(d.warningsHi);
+
+        var thi = dash(d.timeOfDayHi);
+        var ten = dash(d.timeOfDayEn);
+        document.getElementById("timeOfDayHi").textContent = thi === "—" ? s.notSpecified : thi;
+        document.getElementById("timeOfDayEn").textContent = ten === "—" ? s.notSpecified : ten;
+
+        var wte = dash(d.whenToTakeEn);
+        var wth = dash(d.whenToTakeHi);
+        document.getElementById("whenToTakeEn").textContent = wte === "—" ? s.notSpecified : wte;
+        document.getElementById("whenToTakeHi").textContent = wth === "—" ? s.notSpecified : wth;
+
+        var tpe = dash(d.timesPerDayEn);
+        var tph = dash(d.timesPerDayHi);
+        document.getElementById("timesPerDayEn").textContent = tpe === "—" ? s.notSpecified : tpe;
+        document.getElementById("timesPerDayHi").textContent = tph === "—" ? s.notSpecified : tph;
+
+        var cre = dash(d.courseDurationEn);
+        var crh = dash(d.courseDurationHi);
+        document.getElementById("courseDurationEn").textContent = cre === "—" ? s.notSpecified : cre;
+        document.getElementById("courseDurationHi").textContent = crh === "—" ? s.notSpecified : crh;
+      } catch (e) {
+        emptyP.textContent = s.readErr;
+      }
+    })();
+  </script>
+</body>
+</html>

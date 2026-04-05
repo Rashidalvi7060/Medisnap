@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1D9E75">
+  <title>MediSnap — Reminders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1D9E75;
+      --primary-dark: #168a65;
+      --primary-soft: rgba(29, 158, 117, 0.12);
+      --primary-glow: rgba(29, 158, 117, 0.35);
+      --bg: #f4faf7;
+      --surface: #ffffff;
+      --text: #0f241c;
+      --text-muted: #5c7268;
+      --radius: 20px;
+      --radius-lg: 28px;
+      --shadow: 0 8px 32px rgba(15, 36, 28, 0.08);
+      --nav-h: 72px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      line-height: 1.5;
+    }
+    .app {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100dvh;
+      padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 24px);
+    }
+    .top-bar {
+      padding: calc(16px + var(--safe-top)) 20px 12px;
+      background: var(--surface);
+      box-shadow: 0 1px 0 rgba(29, 158, 117, 0.08);
+    }
+    .top-bar h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; }
+    .top-bar p { font-size: 0.88rem; color: var(--text-muted); margin-top: 4px; }
+    main { padding: 20px; }
+    .slot {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 18px 18px 16px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: opacity 0.2s;
+    }
+    .slot.disabled { opacity: 0.55; }
+    .slot-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+    .slot-icon.morning { background: linear-gradient(145deg, #ffe8a3, #ffd54f); color: #7a5f00; }
+    .slot-icon.afternoon { background: linear-gradient(145deg, #a8e6ff, #4fc3f7); color: #01579b; }
+    .slot-icon.night { background: linear-gradient(145deg, #c4c9ff, #7c4dff); color: #311b92; }
+    .slot-icon svg { width: 26px; height: 26px; }
+    .slot-body { flex: 1; min-width: 0; }
+    .slot-body strong { font-size: 1rem; display: block; }
+    .slot-body .hi { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+    .slot-body input[type="time"] {
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 2px solid var(--primary-soft);
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      width: 100%;
+      max-width: 160px;
+      background: var(--bg);
+    }
+    .slot-body input[type="time"]:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .toggle-wrap {
+      flex-shrink: 0;
+    }
+    .toggle {
+      width: 52px;
+      height: 30px;
+      border-radius: 100px;
+      background: #d0ddd8;
+      border: none;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.25s;
+    }
+    .toggle.on { background: var(--primary); }
+    .toggle::after {
+      content: "";
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #fff;
+      top: 3px;
+      left: 3px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: transform 0.25s;
+    }
+    .toggle.on::after { transform: translateX(22px); }
+    .save-bar {
+      position: sticky;
+      bottom: 0;
+      padding-top: 8px;
+      margin-top: 8px;
+    }
+    .save-btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 28px var(--primary-glow);
+    }
+    .save-btn:active { transform: scale(0.99); }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(var(--nav-h) + var(--safe-bottom) + 20px);
+      transform: translateX(-50%) translateY(100px);
+      background: var(--text);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      opacity: 0;
+      transition: transform 0.35s ease, opacity 0.35s ease;
+      z-index: 150;
+      max-width: 90%;
+      text-align: center;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 16px;
+      line-height: 1.55;
+      padding: 0 4px;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(29, 158, 117, 0.12);
+      padding: 8px 12px calc(8px + var(--safe-bottom));
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+    .bottom-nav a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 12px;
+    }
+    .bottom-nav a svg { width: 22px; height: 22px; }
+    .bottom-nav a.active { color: var(--primary); background: var(--primary-soft); }
+  </style>
+  <script>
+    (function () {
+      try {
+        var raw = localStorage.getItem("medisnap_profile");
+        if (!raw) location.replace("onboarding.html");
+        else {
+          var p = JSON.parse(raw);
+          if (!p || !String(p.fullName || "").trim()) location.replace("onboarding.html");
+        }
+      } catch (e) { location.replace("onboarding.html"); }
+    })();
+  </script>
+</head>
+<body>
+  <div class="app">
+    <header class="top-bar">
+      <h1 id="pageTitle"></h1>
+      <p id="pageSub"></p>
+    </header>
+    <main>
+      <div class="slot" id="row-morning" data-key="morning">
+        <div class="slot-icon morning" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </div>
+        <div class="slot-body">
+          <strong id="lblMorning"></strong>
+          <span class="hi" id="subMorning"></span>
+          <input type="time" id="time-morning" value="08:00" aria-label="">
+        </div>
+        <div class="toggle-wrap">
+          <button type="button" class="toggle on" id="tog-morning" aria-pressed="true" aria-label="Morning reminder on"></button>
+        </div>
+      </div>
+      <div class="slot" id="row-afternoon" data-key="afternoon">
+        <div class="slot-icon afternoon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M17 12h2"/></svg>
+        </div>
+        <div class="slot-body">
+          <strong id="lblAfternoon"></strong>
+          <span class="hi" id="subAfternoon"></span>
+          <input type="time" id="time-afternoon" value="14:00" aria-label="">
+        </div>
+        <div class="toggle-wrap">
+          <button type="button" class="toggle on" id="tog-afternoon" aria-pressed="true" aria-label="Afternoon reminder on"></button>
+        </div>
+      </div>
+      <div class="slot" id="row-night" data-key="night">
+        <div class="slot-icon night" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </div>
+        <div class="slot-body">
+          <strong id="lblNight"></strong>
+          <span class="hi" id="subNight"></span>
+          <input type="time" id="time-night" value="21:00" aria-label="">
+        </div>
+        <div class="toggle-wrap">
+          <button type="button" class="toggle on" id="tog-night" aria-pressed="true" aria-label="Night reminder on"></button>
+        </div>
+      </div>
+      <div class="save-bar">
+        <button type="button" class="save-btn" id="saveBtn"></button>
+      </div>
+      <p class="note" id="noteText"></p>
+    </main>
+    <div class="toast" id="toast" role="status"></div>
+    <nav class="bottom-nav" aria-label="Main">
+      <a href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span id="navHome"></span>
+      </a>
+      <a href="scan.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span id="navScan"></span>
+      </a>
+      <a href="reminder.html" class="active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span id="navRemind"></span>
+      </a>
+      <a href="doctor.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span id="navDoctor"></span>
+      </a>
+    </nav>
+  </div>
+  <script>
+    (function () {
+      function lang() {
+        return localStorage.getItem("appLanguage") === "hi" ? "hi" : "en";
+      }
+      var T = {
+        en: {
+          pageTitle: "Medicine reminders",
+          pageSub: "Morning, afternoon, night — set your times.",
+          morning: "Morning",
+          subMorning: "First doses of the day",
+          afternoon: "Afternoon",
+          subAfternoon: "Midday reminder",
+          night: "Night",
+          subNight: "Evening or bedtime",
+          save: "Save reminders",
+          note: "Reminders are saved on this device only. Push notifications need extra setup in the browser.",
+          toast: "Saved successfully.",
+          ariaMorning: "Morning reminder time",
+          ariaAfternoon: "Afternoon reminder time",
+          ariaNight: "Night reminder time",
+          navHome: "Home",
+          navScan: "Scan",
+          navRemind: "Remind",
+          navDoctor: "Doctor"
+        },
+        hi: {
+          pageTitle: "दवा रिमाइंडर",
+          pageSub: "सुबह, दोपहर, रात — समय सेट करें।",
+          morning: "सुबह",
+          subMorning: "दिन की पहली खुराक",
+          afternoon: "दोपहर",
+          subAfternoon: "मध्य दिन का अलर्ट",
+          night: "रात",
+          subNight: "शाम या सोने से पहले",
+          save: "रिमाइंडर सहेजें",
+          note: "रिमाइंडर केवल इस डिवाइस पर सेव होते हैं। पुश सूचनाओं के लिए ब्राउज़र में अतिरिक्त सेटअप चाहिए।",
+          toast: "सफलतापूर्वक सहेजा गया।",
+          ariaMorning: "सुबह का समय",
+          ariaAfternoon: "दोपहर का समय",
+          ariaNight: "रात का समय",
+          navHome: "होम",
+          navScan: "स्कैन",
+          navRemind: "रिमाइंड",
+          navDoctor: "डॉक्टर"
+        }
+      };
+      var L = lang();
+      var s = T[L];
+      document.documentElement.lang = L === "hi" ? "hi" : "en";
+      document.getElementById("pageTitle").textContent = s.pageTitle;
+      document.getElementById("pageSub").textContent = s.pageSub;
+      document.getElementById("lblMorning").textContent = s.morning;
+      document.getElementById("subMorning").textContent = s.subMorning;
+      document.getElementById("lblAfternoon").textContent = s.afternoon;
+      document.getElementById("subAfternoon").textContent = s.subAfternoon;
+      document.getElementById("lblNight").textContent = s.night;
+      document.getElementById("subNight").textContent = s.subNight;
+      document.getElementById("saveBtn").textContent = s.save;
+      document.getElementById("noteText").textContent = s.note;
+      document.getElementById("time-morning").setAttribute("aria-label", s.ariaMorning);
+      document.getElementById("time-afternoon").setAttribute("aria-label", s.ariaAfternoon);
+      document.getElementById("time-night").setAttribute("aria-label", s.ariaNight);
+      document.getElementById("navHome").textContent = s.navHome;
+      document.getElementById("navScan").textContent = s.navScan;
+      document.getElementById("navRemind").textContent = s.navRemind;
+      document.getElementById("navDoctor").textContent = s.navDoctor;
+
+      var STORAGE = "medisnap_reminders";
+      var keys = ["morning", "afternoon", "night"];
+      function load() {
+        try {
+          var s = localStorage.getItem(STORAGE);
+          if (!s) return null;
+          return JSON.parse(s);
+        } catch (e) { return null; }
+      }
+      function apply(data) {
+        if (!data) return;
+        keys.forEach(function (k) {
+          var row = document.getElementById("row-" + k);
+          var tog = document.getElementById("tog-" + k);
+          var time = document.getElementById("time-" + k);
+          var slot = data[k];
+          if (!slot) return;
+          if (slot.time) time.value = slot.time;
+          var on = !!slot.enabled;
+          tog.classList.toggle("on", on);
+          tog.setAttribute("aria-pressed", on);
+          row.classList.toggle("disabled", !on);
+          time.disabled = !on;
+        });
+      }
+      function wireToggle(key) {
+        var tog = document.getElementById("tog-" + key);
+        var row = document.getElementById("row-" + key);
+        var time = document.getElementById("time-" + key);
+        tog.addEventListener("click", function () {
+          var on = !tog.classList.contains("on");
+          tog.classList.toggle("on", on);
+          tog.setAttribute("aria-pressed", on);
+          row.classList.toggle("disabled", !on);
+          time.disabled = !on;
+        });
+      }
+      keys.forEach(wireToggle);
+      apply(load());
+      document.getElementById("saveBtn").addEventListener("click", function () {
+        var out = {};
+        keys.forEach(function (k) {
+          var tog = document.getElementById("tog-" + k);
+          out[k] = {
+            enabled: tog.classList.contains("on"),
+            time: document.getElementById("time-" + k).value
+          };
+        });
+        localStorage.setItem(STORAGE, JSON.stringify(out));
+        var t = document.getElementById("toast");
+        t.textContent = T[lang()].toast;
+        t.classList.add("show");
+        setTimeout(function () { t.classList.remove("show"); }, 2200);
+      });
+    })();
+  </script>
+</body>
+</html>
