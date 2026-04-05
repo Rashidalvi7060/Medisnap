@@ -313,10 +313,7 @@
   </div>
   <script>
     (function () {
-      var GEMINI_API_KEY = "AIzaSyDaZAcGK8OCCxkbs5jMaZhGGvWZOz0xVGY";
-      var GEMINI_GENERATE_URL =
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" +
-        encodeURIComponent(GEMINI_API_KEY);
+      var GEMINI_GENERATE_URL = "/api/analyze";
 
       function lang() {
         return localStorage.getItem("appLanguage") === "hi" ? "hi" : "en";
